@@ -1,4 +1,4 @@
-# ElectaGuide India ???
+ï»¿# ElectaGuide India ???
 
 An AI-powered voter assistance app for India, built for the **Prompt Wars v2** hackathon.
 
@@ -12,7 +12,7 @@ ElectaGuide helps Indian voters with two things:
 
 | Feature | Description |
 |---------|-------------|
-| **Chunav Mitra** | AI chatbot (Gemini 2.5 Flash) that answers questions about voter registration, polling procedures, ECI rules, and voting rights — in plain language, unbiased |
+| **Chunav Mitra** | AI chatbot (Gemini 2.5 Flash) that answers questions about voter registration, polling procedures, ECI rules, and voting rights ï¿½ in plain language, unbiased |
 | **Booth Finder** | Enter any Indian pincode to find nearby post offices and polling area details |
 
 ---
@@ -22,9 +22,9 @@ ElectaGuide helps Indian voters with two things:
 ```
 electaguide/
 +-- frontend/          # React 18 + Vite SPA
-¦   +-- src/
-¦       +-- App.jsx    # Main app — chat UI + booth lookup
-¦       +-- main.jsx
+ï¿½   +-- src/
+ï¿½       +-- App.jsx    # Main app ï¿½ chat UI + booth lookup
+ï¿½       +-- main.jsx
 +-- backend/           # FastAPI server (serves API + static SPA)
     +-- main.py        # API routes + Gemini client
     +-- Dockerfile
@@ -36,7 +36,7 @@ electaguide/
 - Frontend: React 18, Vite
 - Backend: FastAPI, Python 3.11, `google-genai` SDK
 - AI: Gemini 2.5 Flash (Google AI Studio)
-- Deploy: Google Cloud Run (single container — backend serves static frontend)
+- Deploy: Google Cloud Run (single container ï¿½ backend serves static frontend)
 - Secrets: Google Secret Manager
 - CI/CD: Cloud Build (`gcloud run deploy --source .`)
 
@@ -119,7 +119,7 @@ gcloud run deploy electaguide \
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `GEMINI_API_KEY` | Yes | Google AI Studio API key |
-| `GCP_PROJECT` | No | GCP project ID (default: `promptwars-v2`) |
+| `GCP_PROJECT` | No | GCP project ID (only needed if using Vertex AI instead of AI Studio) |
 | `GCP_LOCATION` | No | GCP region (default: `us-central1`) |
 | `PORT` | No | Server port (default: `8080`, set by Cloud Run) |
 
@@ -127,8 +127,8 @@ gcloud run deploy electaguide \
 
 ## Notes
 
-- The backend serves the React SPA via `StaticFiles` — no separate frontend hosting needed
-- If `GEMINI_API_KEY` is not set, the app falls back to Vertex AI (requires `roles/aiplatform.user` on the Cloud Run service account)
+- The backend serves the React SPA via `StaticFiles` ï¿½ no separate frontend hosting needed
+- If `GEMINI_API_KEY` is not set, startup fails with a clear error â€” set it via Secret Manager or as a plain env var
 - Free-tier Gemini quota: 20 requests/day for `gemini-2.5-flash`
 
 ---
@@ -136,3 +136,4 @@ gcloud run deploy electaguide \
 ## License
 
 MIT
+
