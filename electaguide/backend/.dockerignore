@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+graphify-out/
+test_api.py
+list_models.py
+.git/
+*.md
+.gitignore

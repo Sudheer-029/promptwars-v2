@@ -1,0 +1,32 @@
+steps:
+  # 1. Build image
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - gcr.io/$PROJECT_ID/electaguide:$SHORT_SHA
+      - .
+
+  # 2. Push image
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - gcr.io/$PROJECT_ID/electaguide:$SHORT_SHA
+
+  # 3. Deploy to Cloud Run
+  #    GEMINI_API_KEY is read from Secret Manager (set it up first):
+  #    gcloud secrets create gemini-api-key --data-file=- <<< "YOUR_KEY"
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - electaguide
+      - --image=gcr.io/$PROJECT_ID/electaguide:$SHORT_SHA
+      - --region=us-central1
+      - --platform=managed
+      - --allow-unauthenticated
+      - --update-secrets=GEMINI_API_KEY=gemini-api-key:latest
+
+images:
+  - gcr.io/$PROJECT_ID/electaguide:$SHORT_SHA

@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.env
+.env.*
+
+# Node
+node_modules/
+
+# Frontend build output -- generated, not source
+electaguide/frontend/dist/
+electaguide/backend/static/
+
+# Dev/debug scripts (not needed in production)
+electaguide/backend/test_api.py
+electaguide/backend/list_models.py
+
+# Personal notes and scratch files
+propmt.md
+dataset.html
+graphify-out/
+.agent/
+
+# Scratch txt files at root (but NOT requirements.txt etc.)
+/@title*.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# GCP service account keys -- never commit these
+*service-account*.json
+*credentials*.json
+*-key.json
