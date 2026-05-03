@@ -1,9 +1,9 @@
 """Tests for GET /api/booth/{pincode}"""
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 
-def _mock_postal_success(pincode="110001"):
+def _mock_http_success():
     mock_resp = MagicMock()
     mock_resp.json.return_value = [{
         "Status": "Success",
@@ -15,14 +15,16 @@ def _mock_postal_success(pincode="110001"):
     return mock_resp
 
 
-def _mock_postal_not_found():
+def _mock_http_not_found():
     mock_resp = MagicMock()
     mock_resp.json.return_value = [{"Status": "Error", "PostOffice": None}]
     return mock_resp
 
 
 def test_booth_valid_pincode(client):
-    with patch("main.req_lib.get", return_value=_mock_postal_success()):
+    import main
+    main._pincode_cache.clear()
+    with patch.object(main._http_client, "get", new_callable=AsyncMock, return_value=_mock_http_success()):
         resp = client.get("/api/booth/110001")
     assert resp.status_code == 200
     data = resp.json()
@@ -32,7 +34,9 @@ def test_booth_valid_pincode(client):
 
 
 def test_booth_response_structure(client):
-    with patch("main.req_lib.get", return_value=_mock_postal_success()):
+    import main
+    main._pincode_cache.clear()
+    with patch.object(main._http_client, "get", new_callable=AsyncMock, return_value=_mock_http_success()):
         resp = client.get("/api/booth/110001")
     office = resp.json()["offices"][0]
     assert "Name" in office
@@ -41,7 +45,9 @@ def test_booth_response_structure(client):
 
 
 def test_booth_pincode_not_found(client):
-    with patch("main.req_lib.get", return_value=_mock_postal_not_found()):
+    import main
+    main._pincode_cache.clear()
+    with patch.object(main._http_client, "get", new_callable=AsyncMock, return_value=_mock_http_not_found()):
         resp = client.get("/api/booth/999999")
     assert resp.status_code == 200
     assert resp.json()["status"] == "error"
@@ -74,7 +80,9 @@ def test_booth_empty_pincode_returns_404(client):
 
 
 def test_booth_external_api_failure(client):
-    with patch("main.req_lib.get", side_effect=Exception("Connection timeout")):
+    import main
+    main._pincode_cache.clear()
+    with patch.object(main._http_client, "get", new_callable=AsyncMock, side_effect=Exception("timeout")):
         resp = client.get("/api/booth/110001")
     assert resp.status_code == 500
 
@@ -84,7 +92,20 @@ def test_booth_five_digit_pincode_rejected(client):
     assert resp.status_code == 400
 
 
+def test_booth_cache_hit(client):
+    """Second request for same pincode is served from cache."""
+    import main
+    main._pincode_cache.clear()
+    with patch.object(main._http_client, "get", new_callable=AsyncMock, return_value=_mock_http_success()) as mock_get:
+        client.get("/api/booth/560001")
+        client.get("/api/booth/560001")
+        # httpx.get called only once; second hit served from cache
+        assert mock_get.call_count == 1
+
+
 def test_booth_zero_padded_valid(client):
-    with patch("main.req_lib.get", return_value=_mock_postal_success()):
+    import main
+    main._pincode_cache.clear()
+    with patch.object(main._http_client, "get", new_callable=AsyncMock, return_value=_mock_http_success()):
         resp = client.get("/api/booth/011001")
     assert resp.status_code == 200
