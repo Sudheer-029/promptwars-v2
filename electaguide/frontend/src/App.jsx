@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import './index.css';
 import { STATE_ELECTIONS } from './data.js';
 
@@ -646,3 +646,4 @@ export default function App() {
     </div>
   );
 }
+

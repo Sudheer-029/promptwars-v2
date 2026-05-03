@@ -1,13 +1,9 @@
 import os
-import sys
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-# Must be set before main.py is imported
 os.environ.setdefault("GEMINI_API_KEY", "test-api-key-for-ci")
 os.environ.setdefault("PORT", "8080")
-
-# Create static dir so StaticFiles mount does not fail during tests
 os.makedirs("static", exist_ok=True)
 
 
@@ -27,7 +23,7 @@ def mock_gemini():
 @pytest.fixture(scope="session")
 def client(mock_gemini):
     import main
-    main._client = mock_gemini  # inject before TestClient triggers lifespan
+    main._gemini_client = mock_gemini
     from fastapi.testclient import TestClient
     with TestClient(main.app, raise_server_exceptions=True) as c:
         yield c
