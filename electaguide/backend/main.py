@@ -1,4 +1,5 @@
 import os
+import logging
 import requests as req_lib
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
@@ -14,8 +15,21 @@ from google import genai
 load_dotenv()
 
 # ---------------------------------------------------------------------------
-# Gemini client -- lazily initialized so credentials are ready before use.
-# Set GEMINI_API_KEY env var to use Google AI Studio (recommended).
+# Google Cloud Logging -- structured logs visible in Cloud Console.
+# Gracefully falls back to stdlib logging for local development.
+# ---------------------------------------------------------------------------
+try:
+    import google.cloud.logging as cloud_logging
+    _log_client = cloud_logging.Client()
+    _log_client.setup_logging()
+except Exception:
+    pass  # local dev without ADC -- stdlib logging still works
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Gemini client -- lazily initialised so credentials are ready before use.
+# Set GEMINI_API_KEY to use Google AI Studio (recommended).
 # Without it, falls back to Vertex AI via Application Default Credentials.
 # ---------------------------------------------------------------------------
 GCP_PROJECT = os.environ.get("GCP_PROJECT", "")
@@ -39,6 +53,7 @@ def get_client() -> genai.Client:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     get_client()
+    logger.info("ElectaGuide startup complete")
     yield
 
 
@@ -83,9 +98,12 @@ async def chat_with_ellie(request: Request, req: ChatRequest):
     prompt = system_instruction + " User Question: " + req.query + " Answer:"
     last_error = None
 
+    logger.info("chat request received", extra={"json_fields": {"query_length": len(req.query)}})
+
     for model in models:
         try:
             response = client.models.generate_content(model=model, contents=prompt)
+            logger.info("chat response sent", extra={"json_fields": {"model": model}})
             return {"answer": response.text, "model": model}
         except Exception as e:
             err_str = str(e)
@@ -108,6 +126,7 @@ async def get_booth_details(pincode: str):
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = req_lib.get(url, headers=headers, timeout=10)
         data = resp.json()
+        logger.info("booth lookup", extra={"json_fields": {"pincode": pincode}})
         if data and isinstance(data, list) and data[0].get("Status") == "Success":
             return {"status": "success", "offices": data[0].get("PostOffice", [])}
         return {"status": "error", "message": "No booth found for this pincode."}
@@ -116,7 +135,8 @@ async def get_booth_details(pincode: str):
 
 
 # Serve React SPA -- mounted LAST so API routes above take priority
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+if os.path.isdir("static"):
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
