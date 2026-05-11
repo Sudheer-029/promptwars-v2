@@ -1,6 +1,6 @@
 # ElectaGuide India
 
-> **Hackathon Result: Ranked 360 / 19,799 participants — Top 1% globally**  
+> **Hackathon Result: Ranked 182 / 19,799 participants — Top 1% globally**  
 > Built for the Prompt Wars v2 international AI hackathon
 
 An AI-powered voter assistance platform for India — available in **8 Indian languages**.  
@@ -123,7 +123,7 @@ gcloud run deploy electaguide \
 ## Hackathon Context
 
 Built for **Prompt Wars v2** — an international AI competition with 19,799 participants across 177 countries.  
-Final rank: **360 / 19,799 (Top 1% globally)**
+Final rank: **182 / 19,799 (Top 1% globally)**
 
 The challenge: build an AI application that solves a real-world problem using LLM capabilities.  
 ElectaGuide addressed civic information inequality at scale — a problem affecting nearly 1 billion voters.
